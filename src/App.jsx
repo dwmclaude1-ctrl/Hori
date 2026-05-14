@@ -216,6 +216,7 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
   const [selecting, setSelecting] = useState(false);
+  const [pdfZoom, setPdfZoom] = useState(0.6);
   const [start, setStart] = useState(null);   // { x, y } in 0–1 fractions
   const [current, setCurrent] = useState(null); // { x, y }
   const [imgDims, setImgDims] = useState(null);
