@@ -614,7 +614,7 @@ export default function App() {
   };
 
   const saveCropToLevel = level => {
-    const images = pendingCrop
+    const images = (pendingCrop && pendingCrop !== "__collected__")
       ? [pendingCrop]
       : collectedCrops.map(c => c.dataURL);
     if (!images.length) return;
@@ -913,7 +913,7 @@ export default function App() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "12px" }}>
             {practiceSet.images.map((src, i) => (
               <div key={i} onClick={() => openLb(practiceSet.images, i)} className="water-card" style={{ cursor: "pointer", borderRadius: "10px", overflow: "hidden", border: `1px solid ${C.borderMid}`, background: "#fff" }}>
-                <img src={src} alt={`Page ${i + 1}`} style={{ width: "100%", display: "block", objectFit: "contain" }} />
+                <img src={src} alt={`Page ${i + 1}`} style={{ width: "100%", display: "block", height: "auto" }} />
                 <div style={{ padding: "6px 10px", fontSize: "11px", color: C.textDim, background: C.bgInner }}>Tap to enlarge</div>
               </div>
             ))}
