@@ -212,7 +212,7 @@ function Timer({ running, onStop }) {
 }
 
 // ─── PDF Page renderer with 2D box crop selection ────────────────────────────
-function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNext, pdfName }) {
+function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNext, pdfName, zoom }) {
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
   const [selecting, setSelecting] = useState(false);
