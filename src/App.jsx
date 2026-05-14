@@ -212,11 +212,10 @@ function Timer({ running, onStop }) {
 }
 
 // ─── PDF Page renderer with 2D box crop selection ────────────────────────────
-function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNext, pdfName, zoom }) {
+function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNext, pdfName }) {
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
   const [selecting, setSelecting] = useState(false);
-  const [pdfZoom, setPdfZoom] = useState(0.6);
   const [start, setStart] = useState(null);   // { x, y } in 0–1 fractions
   const [current, setCurrent] = useState(null); // { x, y }
   const [imgDims, setImgDims] = useState(null);
@@ -341,7 +340,7 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
       {/* Page canvas area */}
       <div style={{ flex: 1, overflow: "auto", position: "relative", background: "#060608" }}>
         <div style={{ position: "relative", display: "inline-block", width: "100%", userSelect: "none" }}>
-          <canvas ref={canvasRef} style={{ display: "block", width: `${zoom * 100}%`, height: "auto" }} />
+          <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "auto" }} />
 
           {/* Capture ripple overlay */}
           {flash && (
@@ -362,7 +361,7 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
             onTouchStart={onMouseDown}
             onTouchMove={onMouseMove}
             onTouchEnd={onMouseUp}
-            style={{ position: "absolute", inset: 0, cursor: "crosshair", width: `${zoom * 100}%`, height: "100%" }}
+            style={{ position: "absolute", inset: 0, cursor: "crosshair" }}
           >
             {/* Selection box with animated corners */}
             {selActive && (
@@ -683,7 +682,6 @@ export default function App() {
           {pdfPages.length > 0 ? (
             <PDFPageCropper
               pageDataURL={pdfPages[currentPage - 1]}
-              zoom={pdfZoom}
               pageNum={currentPage}
               totalPages={pdfPages.length}
               onCrop={handleCrop}
