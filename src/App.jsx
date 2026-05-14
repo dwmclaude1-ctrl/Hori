@@ -362,7 +362,7 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
             onTouchStart={onMouseDown}
             onTouchMove={onMouseMove}
             onTouchEnd={onMouseUp}
-            style={{ position: "absolute", inset: 0, cursor: "crosshair" }}
+            style={{ position: "absolute", inset: 0, cursor: "crosshair", width: `${zoom * 100}%`, height: "100%" }}
           >
             {/* Selection box with animated corners */}
             {selActive && (
