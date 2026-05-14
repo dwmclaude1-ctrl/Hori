@@ -43,15 +43,125 @@ function loadPDFJS() {
   });
 }
 
+// ─── Global watery styles ─────────────────────────────────────────────────────
+const WATER_STYLES = `
+  @keyframes waterFloat {
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    33%      { transform: translateY(-4px) rotate(0.4deg); }
+    66%      { transform: translateY(2px) rotate(-0.3deg); }
+  }
+  @keyframes ripple {
+    0%   { transform: scale(0.85); opacity: 0.7; }
+    60%  { transform: scale(1.08); opacity: 0.15; }
+    100% { transform: scale(1.18); opacity: 0; }
+  }
+  @keyframes liquidBorder {
+    0%,100% { border-radius: 14px 16px 13px 15px / 15px 13px 16px 14px; }
+    25%      { border-radius: 16px 12px 15px 14px / 13px 16px 14px 15px; }
+    50%      { border-radius: 13px 15px 16px 12px / 16px 14px 13px 15px; }
+    75%      { border-radius: 15px 14px 12px 16px / 14px 15px 16px 13px; }
+  }
+  @keyframes waveScan {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  @keyframes toastRise {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.94); filter: blur(3px); }
+    60%  { transform: translateX(-50%) translateY(-2px) scale(1.02); filter: blur(0); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes flowIn {
+    0%   { opacity: 0; transform: translateY(18px); filter: blur(4px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes modalSwell {
+    0%   { opacity: 0; transform: scale(0.93) translateY(10px); filter: blur(6px); }
+    65%  { transform: scale(1.015) translateY(-1px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  }
+  @keyframes selPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(120,100,255,0.5), 0 0 12px 0 rgba(100,80,255,0.15); }
+    50%      { box-shadow: 0 0 0 6px rgba(120,100,255,0), 0 0 28px 4px rgba(100,80,255,0.25); }
+  }
+  @keyframes captureRipple {
+    0%   { opacity: 0.5; transform: scale(0.96); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(1.04); filter: blur(8px); }
+  }
+  @keyframes cornerFlow {
+    0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+    65%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes streakBob {
+    0%,100% { transform: scale(1) rotate(-2deg); }
+    50%      { transform: scale(1.12) rotate(2deg); }
+  }
+  @keyframes barFill {
+    0%   { width: 0%; opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+  @keyframes softGlow {
+    0%,100% { opacity: 0.7; }
+    50%      { opacity: 1; }
+  }
+
+  .water-btn {
+    transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1),
+                background 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
+                border-color 0.35s cubic-bezier(0.25,0.46,0.45,0.94),
+                box-shadow 0.4s cubic-bezier(0.25,0.46,0.45,0.94),
+                color 0.3s ease !important;
+  }
+  .water-btn:hover {
+    transform: translateY(-2px) scale(1.03) !important;
+    box-shadow: 0 6px 24px rgba(100,80,200,0.2) !important;
+  }
+  .water-btn:active {
+    transform: translateY(1px) scale(0.97) !important;
+    transition-duration: 0.12s !important;
+  }
+  .water-card {
+    transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1),
+                border-color 0.4s ease,
+                box-shadow 0.5s ease !important;
+  }
+  .water-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 12px 40px rgba(80,60,180,0.18) !important;
+  }
+  .sel-box {
+    position: absolute;
+    border: 1.5px solid rgba(140,120,255,0.85);
+    border-radius: 4px;
+    background: rgba(100,80,240,0.07);
+    pointer-events: none;
+    animation: selPulse 2s ease-in-out infinite;
+    backdrop-filter: brightness(1.03) saturate(1.1);
+  }
+  .sel-corner {
+    position: absolute;
+    width: 7px; height: 7px;
+    background: #b0a0ff;
+    border-radius: 2px;
+    animation: cornerFlow 0.22s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .flow-in { animation: flowIn 0.55s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+  .water-float { animation: waterFloat 5s ease-in-out infinite; }
+`;
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ msg }) {
   if (!msg) return null;
   return (
     <div style={{
-      position: "fixed", bottom: "32px", left: "50%", transform: "translateX(-50%)",
-      background: "#f0ebe0", color: "#111", padding: "10px 22px", borderRadius: "999px",
-      fontSize: "13px", fontWeight: "600", boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+      position: "fixed", bottom: "32px", left: "50%",
+      background: "linear-gradient(135deg, #f0ebe0 0%, #e8e2d8 100%)",
+      color: "#111", padding: "10px 22px", borderRadius: "999px",
+      fontSize: "13px", fontWeight: "600",
+      boxShadow: "0 4px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)",
       zIndex: 9999, pointerEvents: "none", whiteSpace: "nowrap",
+      animation: "toastRise 0.5s cubic-bezier(0.34,1.56,0.64,1) both",
     }}>{msg}</div>
   );
 }
@@ -101,16 +211,16 @@ function Timer({ running, onStop }) {
   );
 }
 
-// ─── PDF Page renderer with crop selection ────────────────────────────────────
+// ─── PDF Page renderer with 2D box crop selection ────────────────────────────
 function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNext, pdfName }) {
   const canvasRef = useRef(null);
   const overlayRef = useRef(null);
   const [selecting, setSelecting] = useState(false);
-  const [startY, setStartY] = useState(null);
-  const [currentY, setCurrentY] = useState(null);
+  const [start, setStart] = useState(null);   // { x, y } in 0–1 fractions
+  const [current, setCurrent] = useState(null); // { x, y }
   const [imgDims, setImgDims] = useState(null);
+  const [flash, setFlash] = useState(false);
 
-  // Draw the page image onto canvas when it loads
   useEffect(() => {
     if (!pageDataURL || !canvasRef.current) return;
     const img = new Image();
@@ -126,70 +236,104 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
     img.src = pageDataURL;
   }, [pageDataURL]);
 
-  const getY = (e, el) => {
+  const getPos = (e, el) => {
     const rect = el.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    return {
+      x: Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)),
+      y: Math.max(0, Math.min(1, (clientY - rect.top) / rect.height)),
+    };
   };
 
   const onMouseDown = (e) => {
     e.preventDefault();
-    const y = getY(e, overlayRef.current);
-    setStartY(y);
-    setCurrentY(y);
+    const pos = getPos(e, overlayRef.current);
+    setStart(pos);
+    setCurrent(pos);
     setSelecting(true);
   };
 
   const onMouseMove = useCallback((e) => {
     if (!selecting) return;
     e.preventDefault();
-    setCurrentY(getY(e, overlayRef.current));
+    setCurrent(getPos(e, overlayRef.current));
   }, [selecting]);
 
   const onMouseUp = useCallback(async (e) => {
-    if (!selecting || startY === null) return;
+    if (!selecting || !start) return;
     e.preventDefault();
     setSelecting(false);
-    const y1 = Math.min(startY, currentY);
-    const y2 = Math.max(startY, currentY);
-    if (y2 - y1 < 0.02) { setStartY(null); setCurrentY(null); return; } // too small
-    // Crop from canvas
+
+    const x1 = Math.min(start.x, current.x);
+    const x2 = Math.max(start.x, current.x);
+    const y1 = Math.min(start.y, current.y);
+    const y2 = Math.max(start.y, current.y);
+
+    // Too small — cancel
+    if (x2 - x1 < 0.02 || y2 - y1 < 0.01) {
+      setStart(null); setCurrent(null); return;
+    }
+
+    // Flash animation on capture
+    setFlash(true);
+    setTimeout(() => setFlash(false), 350);
+
     const canvas = canvasRef.current;
     if (!canvas || !imgDims) return;
+
+    const cropX = Math.floor(x1 * imgDims.width);
     const cropY = Math.floor(y1 * imgDims.height);
+    const cropW = Math.ceil((x2 - x1) * imgDims.width);
     const cropH = Math.ceil((y2 - y1) * imgDims.height);
+
     const out = document.createElement("canvas");
-    out.width = imgDims.width;
+    out.width = Math.max(cropW, 1);
     out.height = Math.max(cropH, 1);
     const ctx = out.getContext("2d");
-    ctx.drawImage(canvas, 0, cropY, imgDims.width, cropH, 0, 0, imgDims.width, cropH);
+    ctx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
     const dataURL = out.toDataURL("image/jpeg", 0.93);
-    setStartY(null);
-    setCurrentY(null);
-    onCrop(dataURL);
-  }, [selecting, startY, currentY, imgDims, onCrop]);
 
-  const selTop = startY !== null && currentY !== null ? `${Math.min(startY, currentY) * 100}%` : null;
-  const selH = startY !== null && currentY !== null ? `${Math.abs(currentY - startY) * 100}%` : null;
+    setStart(null); setCurrent(null);
+    onCrop(dataURL);
+  }, [selecting, start, current, imgDims, onCrop]);
+
+  // Compute selection box in % for positioning
+  const selBox = start && current ? {
+    left:   `${Math.min(start.x, current.x) * 100}%`,
+    top:    `${Math.min(start.y, current.y) * 100}%`,
+    width:  `${Math.abs(current.x - start.x) * 100}%`,
+    height: `${Math.abs(current.y - start.y) * 100}%`,
+  } : null;
+
+  const selActive = selBox && parseFloat(selBox.width) > 0.5 && parseFloat(selBox.height) > 0.5;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+      <style>{`
+        @keyframes captureFlash {
+          0%   { opacity: 0; transform: scale(0.98); }
+          30%  { opacity: 0.32; transform: scale(1.0); }
+          100% { opacity: 0; transform: scale(1.03); filter: blur(4px); }
+        }
+      `}</style>
+
       {/* Top nav bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", background: "#0f0f18", borderBottom: "1px solid #1e1e2e", flexShrink: 0 }}>
         <div style={{ fontSize: "13px", color: "#6060a0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>
           📄 {pdfName}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <button onClick={onPrev} disabled={pageNum <= 1} style={{ background: pageNum <= 1 ? "#0c0c14" : "#1a1a2a", border: "1px solid #2a2a3a", color: pageNum <= 1 ? "#2a2a3a" : "#8080c0", padding: "5px 12px", borderRadius: "6px", cursor: pageNum <= 1 ? "default" : "pointer", fontSize: "13px", fontFamily: "inherit" }}>← Prev</button>
+          <button onClick={onPrev} disabled={pageNum <= 1} style={{ background: pageNum <= 1 ? "#0c0c14" : "#1a1a2a", border: "1px solid #2a2a3a", color: pageNum <= 1 ? "#2a2a3a" : "#8080c0", padding: "5px 12px", borderRadius: "6px", cursor: pageNum <= 1 ? "default" : "pointer", fontSize: "13px", fontFamily: "inherit", transition: "all 0.15s" }}>← Prev</button>
           <span style={{ fontSize: "13px", color: "#5050a0", minWidth: "70px", textAlign: "center" }}>Page {pageNum} / {totalPages}</span>
-          <button onClick={onNext} disabled={pageNum >= totalPages} style={{ background: pageNum >= totalPages ? "#0c0c14" : "#1a1a2a", border: "1px solid #2a2a3a", color: pageNum >= totalPages ? "#2a2a3a" : "#8080c0", padding: "5px 12px", borderRadius: "6px", cursor: pageNum >= totalPages ? "default" : "pointer", fontSize: "13px", fontFamily: "inherit" }}>Next →</button>
+          <button onClick={onNext} disabled={pageNum >= totalPages} style={{ background: pageNum >= totalPages ? "#0c0c14" : "#1a1a2a", border: "1px solid #2a2a3a", color: pageNum >= totalPages ? "#2a2a3a" : "#8080c0", padding: "5px 12px", borderRadius: "6px", cursor: pageNum >= totalPages ? "default" : "pointer", fontSize: "13px", fontFamily: "inherit", transition: "all 0.15s" }}>Next →</button>
         </div>
       </div>
 
       {/* Instruction */}
       <div style={{ padding: "8px 16px", background: "#0a0a12", borderBottom: "1px solid #1a1a28", flexShrink: 0 }}>
         <p style={{ margin: 0, fontSize: "12px", color: "#4a4a7a", textAlign: "center" }}>
-          ✂ <strong style={{ color: "#6060a0" }}>Click and drag</strong> to select a question — a crop will be captured automatically
+          ✂ <strong style={{ color: "#6060a0" }}>Click and drag</strong> to draw a box around a question — it will be cropped automatically
         </p>
       </div>
 
@@ -197,7 +341,18 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
       <div style={{ flex: 1, overflow: "auto", position: "relative", background: "#060608" }}>
         <div style={{ position: "relative", display: "inline-block", width: "100%", userSelect: "none" }}>
           <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "auto" }} />
-          {/* Overlay for drag selection */}
+
+          {/* Capture ripple overlay */}
+          {flash && (
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "radial-gradient(ellipse at center, rgba(140,120,255,0.3) 0%, rgba(80,60,200,0.08) 70%, transparent 100%)",
+              pointerEvents: "none",
+              animation: "captureFlash 0.5s cubic-bezier(0.25,0.46,0.45,0.94) forwards",
+            }} />
+          )}
+
+          {/* Drag overlay */}
           <div
             ref={overlayRef}
             onMouseDown={onMouseDown}
@@ -208,15 +363,15 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
             onTouchEnd={onMouseUp}
             style={{ position: "absolute", inset: 0, cursor: "crosshair" }}
           >
-            {/* Selection rectangle */}
-            {selTop && selH && (
-              <div style={{
-                position: "absolute", left: 0, right: 0,
-                top: selTop, height: selH,
-                background: "rgba(96, 96, 240, 0.15)",
-                border: "2px solid rgba(96, 96, 240, 0.8)",
-                pointerEvents: "none",
-              }} />
+            {/* Selection box with animated corners */}
+            {selActive && (
+              <div className="sel-box" style={selBox}>
+                {/* corners */}
+                <span className="sel-corner" style={{ top: -3, left: -3 }} />
+                <span className="sel-corner" style={{ top: -3, right: -3 }} />
+                <span className="sel-corner" style={{ bottom: -3, left: -3 }} />
+                <span className="sel-corner" style={{ bottom: -3, right: -3 }} />
+              </div>
             )}
           </div>
         </div>
@@ -228,8 +383,8 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
 // ─── Crop Confirm Modal ───────────────────────────────────────────────────────
 function CropModal({ cropDataURL, onSave, onDiscard, pendingLabel, setPendingLabel, pendingMarks, setPendingMarks }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-      <div style={{ background: "#0f0f1a", border: "1px solid #2a2a3e", borderRadius: "16px", width: "100%", maxWidth: "520px", overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", backdropFilter: "blur(4px)", animation: "flowIn 0.3s ease both" }}>
+      <div style={{ background: "#0f0f1a", border: "1px solid #2a2a3e", borderRadius: "16px", width: "100%", maxWidth: "520px", overflow: "hidden", animation: "modalSwell 0.45s cubic-bezier(0.34,1.56,0.64,1) both" }}>
         <div style={{ padding: "18px 22px", borderBottom: "1px solid #1e1e2e" }}>
           <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "700", color: "#f0ebe0" }}>Save this crop?</h3>
           <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#4a4a6a" }}>Choose a stack level — it'll be saved there instantly.</p>
@@ -270,11 +425,12 @@ function CropModal({ cropDataURL, onSave, onDiscard, pendingLabel, setPendingLab
             {LEVELS.map(l => {
               const m = LEVEL_META[l];
               return (
-                <button key={l} onClick={() => onSave(l)} style={{
+                <button key={l} onClick={() => onSave(l)}
+                  className="water-btn"
+                  style={{
                   background: m.dim, border: `1.5px solid ${m.accent}`, color: m.accent,
                   padding: "12px 6px", borderRadius: "10px", cursor: "pointer",
                   fontFamily: "inherit", fontWeight: "700", fontSize: "14px",
-                  transition: "all 0.12s",
                 }}
                   onMouseEnter={e => { e.currentTarget.style.background = m.accent; e.currentTarget.style.color = "#000"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = m.dim; e.currentTarget.style.color = m.accent; }}
@@ -289,7 +445,7 @@ function CropModal({ cropDataURL, onSave, onDiscard, pendingLabel, setPendingLab
 
         {/* Discard */}
         <div style={{ padding: "0 22px 18px" }}>
-          <button onClick={onDiscard} style={{ width: "100%", background: "none", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "9px", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
+          <button onClick={onDiscard} className="water-btn" style={{ width: "100%", background: "none", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "9px", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
             ✕ Discard and keep cropping
           </button>
         </div>
@@ -482,6 +638,7 @@ export default function App() {
   if (page === "pdfCrop") {
     return (
       <div style={{ ...P, display: "flex", flexDirection: "column", height: "100svh" }}>
+        <style>{WATER_STYLES}</style>
         <Toast msg={toast} />
         {pendingCrop && (
           <CropModal
@@ -499,6 +656,7 @@ export default function App() {
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <button
               onClick={() => pdfInputRef.current.click()}
+              className="water-btn"
               style={{ background: "#1a1a2a", border: "1px solid #3a3a5a", color: "#8080c0", padding: "6px 14px", borderRadius: "7px", cursor: "pointer", fontSize: "12px", fontFamily: "inherit" }}
             >
               📄 New PDF
@@ -558,22 +716,23 @@ export default function App() {
   if (page === "browse") {
     return (
       <div style={P}>
+        <style>{WATER_STYLES}</style>
         <Toast msg={toast} />
         <Lightbox images={lbImgs} index={lbIdx} onClose={() => setLbIdx(null)} onNav={navLb} />
         <div style={HDR}>
           <span style={{ fontSize: "16px", fontWeight: "700", color: "#f0ebe0" }}>⬡ All Stacks</span>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button style={BACK} onClick={() => setPage("pdfCrop")}>✂ Crop PDF</button>
-            <button style={BACK} onClick={() => setPage("home")}>← Home</button>
+            <button className="water-btn" style={BACK} onClick={() => setPage("pdfCrop")}>✂ Crop PDF</button>
+            <button className="water-btn" style={BACK} onClick={() => setPage("home")}>← Home</button>
           </div>
         </div>
         <div style={WRAP}>
           <h2 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 24px", color: "#f0ebe0", letterSpacing: "-1px" }}>Saved stacks</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-            {LEVELS.map(l => {
+            {LEVELS.map((l, li) => {
               const m = LEVEL_META[l]; const sets = db[l] || [];
               return (
-                <div key={l} style={{ background: "#0c0c14", border: "1px solid #1a1a28", borderRadius: "12px", overflow: "hidden" }}>
+                <div key={l} className="flow-in" style={{ background: "#0c0c14", border: "1px solid #1a1a28", borderRadius: "12px", overflow: "hidden", animationDelay: `${li * 0.07}s` }}>
                   <div style={{ padding: "12px 18px", borderBottom: "1px solid #1a1a28", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span style={{ fontSize: "11px", fontWeight: "700", background: m.dim, color: m.accent, borderRadius: "4px", padding: "2px 9px" }}>LEVEL {l}</span>
@@ -589,6 +748,7 @@ export default function App() {
                         <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                           {entry.images.slice(0, 3).map((src, j) => (
                             <img key={j} src={src} alt="" onClick={() => openLb(entry.images, j)}
+                              className="water-btn"
                               style={{ width: "48px", height: "38px", objectFit: "cover", borderRadius: "4px", border: "1px solid #2a2a3a", cursor: "pointer", background: "#fff" }} />
                           ))}
                         </div>
@@ -599,6 +759,7 @@ export default function App() {
                           </div>
                         </div>
                         <button onClick={() => { if (window.confirm(`Delete "${entry.label}"?`)) deleteSet(l, entry.id); }}
+                          className="water-btn"
                           style={{ background: "#1a0e0e", border: "1px solid #4a1818", color: "#f87171", padding: "4px 11px", borderRadius: "6px", cursor: "pointer", fontSize: "12px", fontFamily: "inherit", flexShrink: 0 }}>
                           Delete
                         </button>
@@ -617,28 +778,32 @@ export default function App() {
   // ── PRACTICE — level select ───────────────────────────────────────────────────
   if (page === "practice") return (
     <div style={P}>
+      <style>{WATER_STYLES}</style>
       <Toast msg={toast} />
       <div style={HDR}>
         <span style={{ fontSize: "16px", fontWeight: "700", color: "#f0ebe0" }}>⬡ Do Stacks</span>
-        <button style={BACK} onClick={() => setPage("home")}>← Home</button>
+        <button className="water-btn" style={BACK} onClick={() => setPage("home")}>← Home</button>
       </div>
       <div style={WRAP}>
         <h2 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 6px", color: "#f0ebe0", letterSpacing: "-1px" }}>Choose a level</h2>
         <p style={{ color: "#4a4a6a", fontSize: "14px", margin: "0 0 30px" }}>A random set from that level will be picked.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {LEVELS.map(l => {
+          {LEVELS.map((l, li) => {
             const m = LEVEL_META[l]; const count = db[l]?.length || 0; const empty = count === 0; const grad = isGraduated(l);
             return (
-              <button key={l} onClick={() => pickRandom(l)} disabled={empty} style={{
+              <button key={l} onClick={() => pickRandom(l)} disabled={empty}
+                className={empty ? "" : "water-card water-btn"}
+                style={{
                 background: empty ? "#0c0c14" : "#10101c", border: `1.5px solid ${empty ? "#1a1a28" : m.dim}`,
                 borderRadius: "14px", padding: "20px 22px", cursor: empty ? "default" : "pointer",
                 display: "flex", alignItems: "center", gap: "16px", fontFamily: "inherit",
-                transition: "border-color 0.2s, background 0.2s", textAlign: "left", opacity: empty ? 0.4 : 1,
+                textAlign: "left", opacity: empty ? 0.4 : 1,
+                animation: `flowIn 0.5s cubic-bezier(0.25,0.46,0.45,0.94) ${li * 0.07}s both`,
               }}
                 onMouseEnter={e => { if (!empty) { e.currentTarget.style.borderColor = m.accent; e.currentTarget.style.background = m.dim; }}}
                 onMouseLeave={e => { if (!empty) { e.currentTarget.style.borderColor = m.dim; e.currentTarget.style.background = "#10101c"; }}}
               >
-                <div style={{ width: "48px", height: "48px", borderRadius: "11px", background: empty ? "#14141e" : m.dim, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: "48px", height: "48px", borderRadius: "11px", background: empty ? "#14141e" : m.dim, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "transform 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>
                   <span style={{ fontSize: "20px", fontWeight: "800", color: empty ? "#2a2a3a" : m.accent }}>L{l}</span>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -649,7 +814,7 @@ export default function App() {
                     {empty ? "No sets yet" : `${count} set${count !== 1 ? "s" : ""} — tap for a random one`}
                   </div>
                 </div>
-                {!empty && <span style={{ fontSize: "20px", color: m.accent }}>→</span>}
+                {!empty && <span style={{ fontSize: "20px", color: m.accent, transition: "transform 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>→</span>}
               </button>
             );
           })}
@@ -660,7 +825,7 @@ export default function App() {
             {LEVELS.map(l => {
               const m = LEVEL_META[l]; const grad = isGraduated(l);
               return (
-                <button key={l} onClick={() => toggleGraduate(l)} style={{
+                <button key={l} onClick={() => toggleGraduate(l)} className="water-btn" style={{
                   background: grad ? m.dim : "#12121c", border: `1px solid ${grad ? m.accent : "#2a2a3a"}`,
                   color: grad ? m.accent : "#4a4a6a", padding: "7px 14px", borderRadius: "8px",
                   cursor: "pointer", fontSize: "12px", fontFamily: "inherit",
@@ -686,6 +851,7 @@ export default function App() {
     const m = LEVEL_META[practiceSet.level];
     return (
       <div style={P}>
+        <style>{WATER_STYLES}</style>
         <Toast msg={toast} />
         <Lightbox images={lbImgs} index={lbIdx} onClose={() => setLbIdx(null)} onNav={navLb} />
         <div style={HDR}>
@@ -694,8 +860,8 @@ export default function App() {
             <span style={{ fontSize: "14px", fontWeight: "600", color: "#b0aba0", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{practiceSet.label}</span>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button style={{ ...BACK, borderColor: m.dim, color: m.accent, fontSize: "12px" }} onClick={() => pickRandom(practiceSet.level)}>🎲 New</button>
-            <button style={{ ...BACK, fontSize: "12px" }} onClick={() => setPage("practice")}>← Levels</button>
+            <button className="water-btn" style={{ ...BACK, borderColor: m.dim, color: m.accent, fontSize: "12px" }} onClick={() => pickRandom(practiceSet.level)}>🎲 New</button>
+            <button className="water-btn" style={{ ...BACK, fontSize: "12px" }} onClick={() => setPage("practice")}>← Levels</button>
           </div>
         </div>
         <div style={WRAP}>
@@ -750,18 +916,19 @@ export default function App() {
   // ── HOME ─────────────────────────────────────────────────────────────────────
   return (
     <div style={P}>
+      <style>{WATER_STYLES}</style>
       <Toast msg={toast} />
       <Lightbox images={lbImgs} index={lbIdx} onClose={() => setLbIdx(null)} onNav={navLb} />
       <div style={{ padding: "48px 24px 0", maxWidth: "820px", margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "36px" }}>
           <div>
             <div style={{ fontSize: "10px", letterSpacing: "3px", textTransform: "uppercase", color: "#3a3a5a", marginBottom: "10px" }}>HSC Study Method</div>
-            <h1 style={{ fontSize: "44px", fontWeight: "700", margin: 0, color: "#f0ebe0", letterSpacing: "-2px", lineHeight: 1.05 }}>
-              Horizontal<br />Stack Method
+            <h1 style={{ fontSize: "72px", fontWeight: "800", margin: 0, color: "#f0ebe0", letterSpacing: "-4px", lineHeight: 0.95 }}>
+              Hori
             </h1>
           </div>
-          <div style={{ textAlign: "center", background: "#12121c", border: "1px solid #2a2a3a", borderRadius: "14px", padding: "14px 18px", flexShrink: 0 }}>
-            <div style={{ fontSize: "28px" }}>🔥</div>
+          <div style={{ textAlign: "center", background: "#12121c", border: "1px solid #2a2a3a", borderRadius: "14px", padding: "14px 18px", flexShrink: 0, animation: "liquidBorder 8s ease-in-out infinite, waterFloat 6s ease-in-out infinite" }}>
+            <div style={{ fontSize: "28px", display: "inline-block", animation: "streakBob 2.4s ease-in-out infinite" }}>🔥</div>
             <div style={{ fontSize: "22px", fontWeight: "700", color: "#fbbf24", lineHeight: 1 }}>{stats.streak || 0}</div>
             <div style={{ fontSize: "10px", color: "#4a4a6a", marginTop: "3px", letterSpacing: "0.5px" }}>day streak</div>
           </div>
@@ -772,15 +939,17 @@ export default function App() {
             { icon: "✂", title: "Crop a Paper", sub: "Upload a PDF and screenshot questions into stacks.", pg: "pdfCrop", b: "#3a3a58", hov: "#6060a0", bg: "#1a1a2a" },
             { icon: "🎲", title: "Do Stacks",    sub: "Pick a level, get a random set.", pg: "practice", b: "#4a3a6a", hov: "#9060d0", bg: "#1a1228" },
           ].map(btn => (
-            <button key={btn.pg} onClick={() => setPage(btn.pg)} style={{
-              background: btn.bg, border: `1px solid ${btn.b}`, borderRadius: "16px",
-              padding: "26px 22px", textAlign: "left", cursor: "pointer", color: "#e8e4dc",
-              fontFamily: "inherit", transition: "border-color 0.2s",
-            }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = btn.hov}
-              onMouseLeave={e => e.currentTarget.style.borderColor = btn.b}
+            <button key={btn.pg} onClick={() => setPage(btn.pg)}
+              className="water-card water-btn"
+              style={{
+                background: btn.bg, border: `1px solid ${btn.b}`, borderRadius: "16px",
+                padding: "26px 22px", textAlign: "left", cursor: "pointer", color: "#e8e4dc",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = btn.hov; e.currentTarget.style.background = btn.bg.replace("1a", "22"); }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = btn.b; e.currentTarget.style.background = btn.bg; }}
             >
-              <div style={{ fontSize: "26px", marginBottom: "10px" }}>{btn.icon}</div>
+              <div style={{ fontSize: "26px", marginBottom: "10px", display: "inline-block" }} className="water-float">{btn.icon}</div>
               <div style={{ fontSize: "18px", fontWeight: "700", marginBottom: "5px", color: "#f0ebe0" }}>{btn.title}</div>
               <div style={{ fontSize: "12px", color: "#5a5a7a", lineHeight: 1.5 }}>{btn.sub}</div>
             </button>
@@ -817,10 +986,10 @@ export default function App() {
         </div>
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button onClick={exportBackup} style={{ flex: 1, background: "#0f0f18", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "10px", borderRadius: "10px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
+          <button onClick={exportBackup} className="water-btn" style={{ flex: 1, background: "#0f0f18", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "10px", borderRadius: "10px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
             ⬇ Export backup
           </button>
-          <button onClick={() => importRef.current.click()} style={{ flex: 1, background: "#0f0f18", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "10px", borderRadius: "10px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
+          <button onClick={() => importRef.current.click()} className="water-btn" style={{ flex: 1, background: "#0f0f18", border: "1px solid #2a2a3a", color: "#5a5a7a", padding: "10px", borderRadius: "10px", cursor: "pointer", fontSize: "13px", fontFamily: "inherit" }}>
             ⬆ Import backup
           </button>
           <input ref={importRef} type="file" accept=".json" style={{ display: "none" }} onChange={importBackup} />
@@ -832,8 +1001,8 @@ export default function App() {
       </div>
 
       {showStats && (
-        <div onClick={() => setShowStats(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#0f0f18", border: "1px solid #2a2a3a", borderRadius: "16px", padding: "28px", maxWidth: "400px", width: "100%" }}>
+        <div onClick={() => setShowStats(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", backdropFilter: "blur(4px)", animation: "flowIn 0.3s ease both" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#0f0f18", border: "1px solid #2a2a3a", borderRadius: "16px", padding: "28px", maxWidth: "400px", width: "100%", animation: "modalSwell 0.45s cubic-bezier(0.34,1.56,0.64,1) both" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
               <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#f0ebe0", margin: 0 }}>Your Stats</h3>
               <button onClick={() => setShowStats(false)} style={{ background: "none", border: "none", color: "#5a5a7a", cursor: "pointer", fontSize: "18px" }}>✕</button>
@@ -857,7 +1026,7 @@ export default function App() {
                     <span>{m.emoji} {m.label}</span><span>{count}</span>
                   </div>
                   <div style={{ height: "5px", background: "#1a1a28", borderRadius: "3px" }}>
-                    <div style={{ height: "100%", width: `${(count / max) * 100}%`, background: m.accent, borderRadius: "3px" }} />
+                    <div style={{ height: "100%", width: `${(count / max) * 100}%`, background: m.accent, borderRadius: "3px", animation: "barFill 0.8s cubic-bezier(0.25,0.46,0.45,0.94) both", animationDelay: `${l * 0.1}s` }} />
                   </div>
                 </div>
               );
