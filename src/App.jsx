@@ -683,6 +683,7 @@ export default function App() {
           {pdfPages.length > 0 ? (
             <PDFPageCropper
               pageDataURL={pdfPages[currentPage - 1]}
+              zoom={pdfZoom}
               pageNum={currentPage}
               totalPages={pdfPages.length}
               onCrop={handleCrop}
