@@ -341,7 +341,7 @@ function PDFPageCropper({ pageDataURL, pageNum, totalPages, onCrop, onPrev, onNe
       {/* Page canvas area */}
       <div style={{ flex: 1, overflow: "auto", position: "relative", background: "#060608" }}>
         <div style={{ position: "relative", display: "inline-block", width: "100%", userSelect: "none" }}>
-          <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "auto" }} />
+          <canvas ref={canvasRef} style={{ display: "block", width: `${zoom * 100}%`, height: "auto" }} />
 
           {/* Capture ripple overlay */}
           {flash && (
